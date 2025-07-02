@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+
+# Environment variables
+.env
+
+# Compiled output
+dist/
+build/
+out/
+
+# Editor and IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Tests
+coverage/
+
+# Production
+.vercel
+.netlify
