@@ -8,5 +8,6 @@ export const dbConnect = () =>{
         console.log('db connected')
     }).catch((error)=>{
         console.log('db connection failed:', error.message)
+        console.log(error) 
     })
 }
