@@ -70,7 +70,7 @@ export const getCategoryById = async (req: Request, res: Response) => {
     try {
         const category = await CategoryModel.aggregate([
             { $match: { _id: new mongoose.Types.ObjectId(id) } },
-            {
+            { 
                 $lookup: {
                     from: "subcategories",
                     localField: "subcategories", // Assuming subcategories is an array of ObjectIds in Category
@@ -79,7 +79,7 @@ export const getCategoryById = async (req: Request, res: Response) => {
                 }
             },
             {
-                $project: {
+                $project: {   
                     _id: 1,
                     name: 1,
                     description: 1,

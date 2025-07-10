@@ -1,19 +1,20 @@
 import express from 'express'
 import 'dotenv/config';
-// import "@db/connect"
 import { dbConnect } from './db';
 import categoryRouter from './route/category';
 import subcategoryRouter from './route/subcategory';
+import productRouter from './route/product';
 
-const app = express()
+const app = express()   
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Hello World!')     
 })
 app.use("/category", categoryRouter)
 app.use("/subcategory", subcategoryRouter)
+app.use("/product", productRouter)
     
 dbConnect()
  

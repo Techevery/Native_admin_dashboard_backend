@@ -1,13 +1,20 @@
 import { RequestHandler } from "express";
 import formidable , { File } from "formidable";
 
-declare global {
-    namespace Express {
-        interface Request {
-            // files: {[key: string]: File | File[]};
-            files?: Record<string, File| File[] | undefined>;   
-        }
-    }
+// declare global {
+//     namespace Express {
+//         interface Request {
+//             // files: {[key: string]: File | File[]};
+//             files: Record<string, File| File[] | undefined>;   
+//         }
+//     }
+// }
+
+// Augment the Express module
+declare module "express-serve-static-core" {
+  interface Request {
+    files: Record<string, formidable.File | formidable.File[] | undefined>;
+  }
 }
 
 export const fileParser: RequestHandler = async (req, res, next)=>{
@@ -16,6 +23,8 @@ export const fileParser: RequestHandler = async (req, res, next)=>{
     const [fields, files] = await form.parse(req)
     if(!req.body) req.body = {}
     if(!req.files) req.files = {}
+
+    console.log("files", files)
 
     for(const key in fields){
         const filedValue = fields[key]
