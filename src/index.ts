@@ -4,6 +4,8 @@ import { dbConnect } from './db';
 import categoryRouter from './route/category';
 import subcategoryRouter from './route/subcategory';
 import productRouter from './route/product';
+import orderRouter from './route/order';
+import authRouter from './route/auth';
 
 const app = express()   
 app.use(express.json())
@@ -14,7 +16,9 @@ app.get('/', (req, res) => {
 })
 app.use("/category", categoryRouter)
 app.use("/subcategory", subcategoryRouter)
-app.use("/product", productRouter)
+app.use("/product", productRouter) 
+app.use("/order", orderRouter)
+app.use("/auth", authRouter)
     
 dbConnect()
  
