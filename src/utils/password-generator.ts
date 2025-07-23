@@ -11,6 +11,3 @@ export const generatePassword = () => {
     
     return password;
 };
-
-// Example usage
-console.log(generatePassword()); 

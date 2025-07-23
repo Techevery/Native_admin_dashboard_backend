@@ -24,8 +24,6 @@ export const fileParser: RequestHandler = async (req, res, next)=>{
     if(!req.body) req.body = {}
     if(!req.files) req.files = {}
 
-    console.log("files", files)
-
     for(const key in fields){
         const filedValue = fields[key]
         if(filedValue) req.body[key] = filedValue[0]
