@@ -35,7 +35,7 @@ export const createProduct: RequestHandler = async (req, res) => {
       try {
         const result = await cloudinary.uploader.upload(image.filepath, {
           folder: 'products',
-        });
+        }); 
         product.image.id = result.public_id;
         product.image.url = result.secure_url;
       } catch (error) {

@@ -6,6 +6,7 @@ import subcategoryRouter from './route/subcategory';
 import productRouter from './route/product';
 import orderRouter from './route/order';
 import authRouter from './route/auth';
+import cors from "cors";
 
 const app = express()   
 app.use(express.json())
@@ -14,6 +15,11 @@ app.use(express.urlencoded({ extended: true }))
 app.get('/', (req, res) => {
   res.send('Hello World!')     
 })
+
+app.use(cors({  
+  origin: "*"
+}))
+   
 app.use("/category", categoryRouter)
 app.use("/subcategory", subcategoryRouter)
 app.use("/product", productRouter) 

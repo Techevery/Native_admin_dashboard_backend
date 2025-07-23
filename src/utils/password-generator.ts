@@ -5,7 +5,7 @@ export const generatePassword = () => {
     const allChars = letters + digits + specialChars;
     
     let password = '';
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 6; i++) { 
         password += allChars.charAt(Math.floor(Math.random() * allChars.length));
     }
     
