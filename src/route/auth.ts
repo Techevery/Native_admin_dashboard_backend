@@ -5,7 +5,6 @@ import { fileParser } from "../middleware/fileParser";
 
 const authRouter = Router()
 
-authRouter.post("/create", createUser)
 authRouter.post("/login", login) 
 authRouter.post("/add-user", fileParser, isAuth, isAdmin, addNewUser)
 authRouter.post("/change-password", isAuth, changeUserPassword)

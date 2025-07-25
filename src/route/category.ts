@@ -5,7 +5,7 @@ import { isAdmin, isAuth } from "../middleware/auth";
 
 const categoryRouter = Router()
 
-categoryRouter.post("/create", isAuth, isAdmin, fileParser, createCategory)  
+categoryRouter.post("/create", fileParser, createCategory)  
 categoryRouter.get("/", getCategory)
 categoryRouter.get("/:id", getCategoryById)
 categoryRouter.patch("/:id", fileParser, updateCategory) // Assuming you want to update the category with the same function

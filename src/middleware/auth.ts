@@ -13,7 +13,7 @@ declare global{
             }
         }
     }
-}
+}   
 
 export const isAuth: RequestHandler = async(req, res, next) => {
     const authToken = req.headers.authorization?.split(" ")[1];

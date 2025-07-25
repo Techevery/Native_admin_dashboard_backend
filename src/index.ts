@@ -7,6 +7,7 @@ import productRouter from './route/product';
 import orderRouter from './route/order';
 import authRouter from './route/auth';
 import cors from "cors";
+import { seedAdmin } from './utils/seed';
 
 const app = express()   
 app.use(express.json())
@@ -16,9 +17,25 @@ app.get('/', (req, res) => {
   res.send('Hello World!')     
 })
 
-app.use(cors({  
-  origin: "*"
-}))
+// app.use(cors({  
+//   origin: "*"
+// })) 
+
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003']
+
+app.use(cors({
+  origin: (origin, callback) => { 
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is in the allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } 
+
+    return callback(new Error('Not allowed by CORS'));
+  }
+}));
    
 app.use("/category", categoryRouter)
 app.use("/subcategory", subcategoryRouter)
@@ -27,6 +44,7 @@ app.use("/order", orderRouter)
 app.use("/auth", authRouter)
     
 dbConnect()
+seedAdmin()
  
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

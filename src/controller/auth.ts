@@ -74,6 +74,7 @@ export const createUser:RequestHandler = async (req, res) => {
 
     // Generate and hash password
     const userPassword = generatePassword();
+    console.log(userPassword)
     const hashedPassword = await hash(userPassword, 10);
 
     // Create user

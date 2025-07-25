@@ -8,7 +8,7 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc && tsc-alias",
     "lint": "eslint . --ext .ts",
-    "seed": "ts-node src/utils/seeder.ts",
+    "seed": "ts-node src/utils/seed.ts",
     "test": "jest"
   },
   "dependencies": {
