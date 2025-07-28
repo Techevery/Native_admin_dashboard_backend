@@ -44,7 +44,7 @@ app.use("/order", orderRouter)
 app.use("/auth", authRouter)
     
 dbConnect()
-seedAdmin()
+seedAdmin() 
  
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
