@@ -24,9 +24,9 @@ export const seedAdmin = async () => {
     if (existingAdmin) {
       console.log("Admin user already exists");
       return;
-    }
-
-    // Hash the password
+    }else {
+      console.log("Admin user does not exist");
+          // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(adminData.password, salt);
 
@@ -43,6 +43,9 @@ export const seedAdmin = async () => {
     // Close the connection
     await mongoose.connection.close();
     console.log("Database connection closed");
+
+    }
+
   } catch (error: any) {
     console.error("Error seeding admin data:", error.message);
     console.error(error);
