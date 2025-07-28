@@ -62,13 +62,13 @@ try {
             amount: productAmount,
             email,
             metadata,
-            // callback_url: `${req.headers.origin}/order-received`, // Uncomment if needed
-        });
+            callback_url: `${req.headers.origin}`,
+        }); 
 
         const options = {
             hostname: "api.paystack.co",
             port: 443,
-            path: "/transaction/initialize",
+            path: "/transaction/initialize", 
             method: "POST",
             headers: {
                 Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
