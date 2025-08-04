@@ -12,14 +12,11 @@ import { seedAdmin } from './utils/seed';
 const app = express()   
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
-app.get('/', (req, res) => {
+ 
+app.get('/', (req, res) => {  
   res.send('Hello World!')     
 })
 
-// app.use(cors({  
-//   origin: "*"
-// })) 
 
 const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003']
 

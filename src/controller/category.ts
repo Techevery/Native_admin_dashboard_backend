@@ -1,17 +1,18 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import cloudinary from "../cloud";
 import CategoryModel from "../model/category";
-import { Request, Response } from "express";
+import { Request, Response } from "express";import OrderModel from "../model/order";
 
 export const getCategory = async (req: Request, res: Response) => {
     try {
+        // Aggregate categories with subcategories
         const categories = await CategoryModel.aggregate([
             {
                 $lookup: {
                     from: "subcategories",
-                    localField: "subcategories", // Assuming subcategories is an array of ObjectIds in Category
-                    foreignField: "_id",              
-                    as: "subcategories"
+                    localField: "subcategories",
+                    foreignField: "_id",
+                    as: "subcategories" 
                 }
             },
             {
@@ -21,7 +22,7 @@ export const getCategory = async (req: Request, res: Response) => {
                     description: 1,
                     status: 1,
                     image: { url: 1 },
-                    subcategoryCount: { $size: "$subcategories" }, // Add count of subcategories
+                    subcategoryCount: { $size: "$subcategories" },
                     subcategories: {
                         $map: {
                             input: "$subcategories",
@@ -36,13 +37,80 @@ export const getCategory = async (req: Request, res: Response) => {
             }
         ]);
 
+        // Get total number of categories
+        const totalCategories = await CategoryModel.countDocuments();
+
+        // Get total number of active categories
+        const totalActiveCategories = await CategoryModel.countDocuments({ status: 'active' });
+
+        // Find the most ordered category
+        const mostOrderedCategory = await OrderModel.aggregate([
+            {
+                $unwind: "$item"
+            },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "item.product",
+                    foreignField: "_id",
+                    as: "productInfo"
+                }
+            },
+            {
+                $unwind: "$productInfo"
+            },
+            {
+                $group: {
+                    _id: "$productInfo.category",
+                    totalOrdered: { $sum: "$item.quantity" }
+                }
+            },
+            {
+                $sort: { totalOrdered: -1 }
+            },
+            {
+                $limit: 1
+            },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "categoryInfo"
+                }
+            },
+            {
+                $unwind: "$categoryInfo"
+            },
+            {
+                $project: {
+                    _id: "$categoryInfo._id",
+                    name: "$categoryInfo.name",
+                    totalOrdered: 1
+                }
+            }
+        ]);
+
         if (!categories.length) {
-            return res.status(404).json({ message: "No categories found" });
+            return res.status(404).json({ 
+                message: "No categories found",
+                totalCategories: 0,
+                totalActiveCategories: 0,
+                mostOrderedCategory: null
+            });
         }
 
-        return res.status(200).json(categories);
+        return res.status(200).json({
+            categories,
+            totalCategories,
+            totalActiveCategories,
+            mostOrderedCategory: mostOrderedCategory.length ? mostOrderedCategory[0] : null
+        });
     } catch (error) {
-        return res.status(500).json({ message: "Error fetching categories", error });
+        return res.status(500).json({ 
+            message: "Error fetching categories", 
+            error 
+        });
     }
 }
    

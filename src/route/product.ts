@@ -5,7 +5,7 @@ import { isAdmin, isAuth } from "../middleware/auth";
 
 const productRouter = Router()
 
-productRouter.post("/create",isAuth, isAdmin, fileParser, createProduct)
+productRouter.post("/create", fileParser, createProduct)
 productRouter.get("/", getAllProduct)    
 productRouter.get("/:id", getProduct)
 
