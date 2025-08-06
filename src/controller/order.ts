@@ -250,13 +250,13 @@ export const createOrder: RequestHandler = async (req, res, next) => {
                         });
 
                         // Send email and SMS
-                        // await sendEmail({
-                        //     email,
-                        //     items: emailItems,
-                        //     grandTotal: amount,
-                        //     address,
-                        //     phone,
-                        // });
+                        await sendEmail({
+                            email,
+                            items: emailItems,
+                            grandTotal: amount,
+                            address,
+                            phone,
+                        });  
 
                         await sendSMSOrder(phone);
 
