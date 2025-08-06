@@ -9,12 +9,13 @@ interface ProductItem {
 // Define the OrderDocs interface
 interface OrderDocs {
     email: string;
-    item: ProductItem[];
+    items: ProductItem[]; 
     address: string;
     phone: string;
     paymentType: "whatsapp" | "card";
     status: "pending" | "completed" | "cancelled";
     reference: string;
+    total: number
 }
 
 // Define the ProductItem schema
@@ -27,7 +28,7 @@ const productItemSchema = new Schema<ProductItem>({
 const orderSchema = new Schema<OrderDocs>(
     {
         email: { type: String, required: true },
-        item: { type: [productItemSchema], required: true }, // Use the subdocument schema
+        items: { type: [productItemSchema], required: true }, // Use the subdocument schema
         address: { type: String, required: true },
         phone: { type: String, required: true },
         paymentType: {
@@ -37,10 +38,11 @@ const orderSchema = new Schema<OrderDocs>(
         },
         status: {
             type: String,
-            enum: ["pending", "completed", "cancelled"],
+            enum: ["pending", "completed", "cancelled", "processing"],
             default: "pending",
         },
         reference: { type: String },
+        total: { type: Number, required: true, min: 0 },
     },
     { timestamps: true }
 );
