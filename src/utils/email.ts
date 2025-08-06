@@ -32,6 +32,25 @@ interface CreateUserPayload {
         },
     });
 
+    import { Resend } from 'resend';
+
+const resend = new Resend('re_T96NsXGV_6REcc2zrncvYNJgjN1VyQBBQ');
+
+(async function () {
+  const { data, error } = await resend.emails.send({
+    from: 'Acme <onboarding@resend.dev>',
+    to: ['delivered@resend.dev'],
+    subject: 'Hello World',
+    html: '<strong>It works!</strong>',
+  });
+
+  if (error) {
+    return console.error({ error });
+  }
+
+  console.log({ data });
+})();
+
 export const sendEmail = async ({ email, items, grandTotal, address, phone }: EmailPayload) => {
 
     const htmlContent = `

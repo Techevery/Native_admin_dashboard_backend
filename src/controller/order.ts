@@ -298,7 +298,7 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
     try {
         // Get pagination parameters from query string with defaults
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
+        const limit = parseInt(req.query.limit as string) || 10; 
         const skip = (page - 1) * limit;
 
         // Define date ranges for monthly and yearly counts
@@ -381,6 +381,14 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
                         },
                         { $count: "count" },
                     ],
+                    processingCount: [
+                        {
+                            $match: {
+                                status: "processing",
+                            },
+                        },
+                        { $count: "count" },
+                    ],
                     // Count of completed orders
                     completedCount: [
                         {
@@ -410,6 +418,7 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
                     pending: { $arrayElemAt: ["$pendingCount.count", 0] },
                     completed: { $arrayElemAt: ["$completedCount.count", 0] },
                     cancelled: { $arrayElemAt: ["$cancelledCount.count", 0] },
+                    processing: { $arrayElemAt: ["$processingCount.count", 0] },
                 },
             },
         ]);
@@ -421,6 +430,7 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
         const pending = result.pending || 0;
         const completed = result.completed || 0;
         const cancelled = result.cancelled || 0;
+        const  processing = result.processing || 0;
 
         // Calculate total pages
         const totalPages = Math.ceil(total / limit);
@@ -439,6 +449,7 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
                     pendingOrders: pending,
                     completedOrders: completed,
                     cancelledOrders: cancelled,
+                    processingOrders: processing,
                 },
             },
         });
@@ -451,7 +462,7 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
 export const updateOrderStatus: RequestHandler = async (req, res, next) => {
     const { orderId } = req.params;
     const { status } = req.body;
-    if (!status || !["pending", "completed", "cancelled"].includes(status)) {
+    if (!status || !["pending", "completed", "cancelled", "processing"].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
     }
     try {

@@ -16,6 +16,10 @@ export const login: RequestHandler = async (req, res) => {
     if (!passwordMatch)
       return res.status(401).json({ message: "Invalid password" });
 
+    // Update last login time
+    user.lastLogin = new Date();
+    await user.save();   
+
     const payload = { id: user._id, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET as string);
     res.status(200).json({ message: "user login successful", token });

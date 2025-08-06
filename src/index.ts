@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 })
 
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', "https://native-delight-admin-jhjiprsbp-amiscripts-projects.vercel.app"]
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', "https://native-delight-admin.vercel.app", "https://native-delight-admin-jhjiprsbp-amiscripts-projects.vercel.app"]
 
 app.use(cors({
   origin: (origin, callback) => { 

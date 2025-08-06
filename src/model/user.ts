@@ -7,6 +7,7 @@ interface UserDocs {
     role: string;
     status: string;
     avatar?: string;
+    lastLogin?: Date;
 }
 
 const userSchema = new Schema<UserDocs>({
@@ -16,6 +17,7 @@ const userSchema = new Schema<UserDocs>({
     role: { type: String, enum: ["admin", "manager", "staff"], default: "admin" }, 
     status: {type: String, enum: ["active", "inactive"], default: "inactive" },
     avatar: {type: String, required: false},
+    lastLogin: { type: Date }
 }, {timestamps: true});
 
 const userModel = model("User", userSchema) 
