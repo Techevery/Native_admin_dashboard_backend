@@ -8,7 +8,7 @@ const categoryRouter = Router()
 categoryRouter.post("/create", fileParser, createCategory)  
 categoryRouter.get("/", getCategory)
 categoryRouter.get("/:id", getCategoryById)
-categoryRouter.patch("/:id", fileParser, updateCategory) // Assuming you want to update the category with the same function
+categoryRouter.patch("/:id", fileParser, updateCategory)
 categoryRouter.delete("/:id", deleteCategory)  
 
 export default categoryRouter    

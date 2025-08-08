@@ -4,145 +4,9 @@ import * as https from 'https';
 import * as crypto from 'crypto';
 import { sendEmail } from "../utils/email";
 import { sendSMSOrder } from "../utils/sms";
-import { startOfMonth, startOfYear } from "date-fns";
+import { startOfMonth, startOfYear, startOfDay, endOfDay } from "date-fns";
 import productModel from "../model/product";
 
-
-// export const createOrder: RequestHandler = async (req, res, next) => {
-//     const { items, amount, address, email, phone, metadata } = req.body;
-
-// if (!items || !Array.isArray(items) || items.length === 0 || !address || !email || !phone || !amount) {
-//     return res.status(400).json({ message: "Missing required fields" });
-// }
-
-// try {
-//     // Validate each item in the items array
-//     for (const item of items) {
-//         if (!item.productId || !item.quantity || item.quantity < 1) {
-//             return res.status(400).json({ message: "Invalid item data" });
-//         }
-//     }
-
-//             // Validate grand total
-//         const grandTotal = emailItems.reduce((sum: number, item: any) => sum + item.amount, 0);
-//         if (grandTotal !== amount) {
-//             return res.status(400).json({ message: "Amount mismatch" });
-//         }
-
-//     // Create and save the order
-//     const newOrder = new OrderModel({
-//         email,
-//         items: items.map(item => ({ product: item.productId, quantity: item.quantity })),
-//         address,
-//         phone,
-//         paymentType: "card",
-//         total: amount, // Store the total amount in the order
-//     });
-
-//         await newOrder.save();
-
-//         const populatedOrder = await OrderModel.findById(newOrder._id)
-//             .populate("items.product") // Populate the product field in item array
-//             .exec();
-
-//         if (!populatedOrder) {
-//             return res.status(500).json({ message: "Failed to retrieve order details" });
-//         }
-
-//         // Prepare email items
-//         const emailItems = populatedOrder.items.map((item: any) => {
-//             const product = item.product; // Populated product
-//             return {
-//                 name: product.name,
-//                 quantity: item.quantity, 
-//                 amount: product.price * item.quantity,   
-//             };
-//         });
-
-
-//         // Prepare Paystack request
-//         const productAmount = amount * 100; // Convert to kobo (Paystack expects amount in kobo)
-
-//         const params = JSON.stringify({  
-//             amount: productAmount,
-//             email,
-//             metadata,
-//             callback_url: `${req.headers.origin}`,
-//         }); 
-
-//         const options = {
-//             hostname: "api.paystack.co",
-//             port: 443,
-//             path: "/transaction/initialize", 
-//             method: "POST",
-//             headers: {
-//                 Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-//                 "Content-Type": "application/json",
-//             },
-//         };
-
-//         // Make Paystack request
-//         const reqPaystack = https.request(options, (respaystack) => {
-//             let data = "";
-
-//             respaystack.on("data", (chunk) => {
-//                 data += chunk;
-//             });
-
-//             respaystack.on("end", async () => {
-//                 try {
-//                     const parsedData = JSON.parse(data);
-
-//                     if (parsedData.status) {
-//                         // Update the order with the Paystack reference
-//                         await OrderModel.findByIdAndUpdate(newOrder._id, {
-//                             reference: parsedData.data.reference,
-//                         });
-
-//                         // send mail to the user 
-//                         // await sendEmail({
-//                         //     email,
-//                         //     items: emailItems,
-//                         //     grandTotal: amount,     
-//                         //     address,
-//                         //     phone,
-//                         // });
-   
-//                         await sendSMSOrder(phone)
-
-//                         // Send success response with Paystack data
-//                         return res.status(200).json({
-//                             message: "Payment initialized successfully",
-//                             data: parsedData.data,
-//                         });
-//                     } else {
-//                         console.error("Payment initialization failed:", parsedData.message);
-//                         return res.status(400).json({
-//                             message: "Failed to initialize payment",
-//                             error: parsedData.message,
-//                         });
-//                     }
-//                 } catch (error) {
-//                     console.error("Error processing payment initialization response:", error);
-//                     return res.status(500).json({
-//                         message: "Error processing payment initialization response",
-//                     });
-//                 }
-//             });
-//         });
-
-//         reqPaystack.on("error", (error) => {
-//             console.error("Error with Paystack request:", error);
-//             return res.status(500).json({ message: "Internal Server Error", error });
-//         });
-
-//         reqPaystack.write(params);
-//         reqPaystack.end();
-//     } catch (error) {
-//         console.error("Error creating order:", error);
-//         return res.status(500).json({ message: "Error creating order", error });
-//     }
-// };
 
 export const createOrder: RequestHandler = async (req, res, next) => {
     const { items, amount, address, email, phone, metadata } = req.body;
@@ -482,4 +346,146 @@ export const updateOrderStatus: RequestHandler = async (req, res, next) => {
         console.error("Error updating order status:", error);
         next(error);
     }
+};
+
+export const  getOrderById: RequestHandler = async (req, res, next) => {
+    const { orderId } = req.params;
+    try {
+        const order = await OrderModel.findById(orderId).exec();
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+        res.status(200).json({
+            success: true,
+            data: order,
+        });
+    } catch (error) {
+        console.error("Error fetching order:", error);
+        next(error);
+    }
+};
+
+export const statistics: RequestHandler = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const startOfCurrentMonth = startOfMonth(now);
+    const startOfCurrentYear = startOfYear(now);
+    const startOfToday = startOfDay(now);
+    const endOfToday = endOfDay(now);
+
+    // 1. Daily Revenue (for today)
+    const dailyRevenue = await OrderModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfToday, $lte: endOfToday },
+          status: "completed", // Only count completed orders
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$total" },
+        },
+      },
+    ]);
+
+    // 2. Total Orders (this month)
+    const totalOrders = await OrderModel.countDocuments({
+      createdAt: { $gte: startOfCurrentMonth },
+      status: "completed",
+    });
+
+    // 3. Average Order Value (this month)
+    const avgOrderValue = await OrderModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfCurrentMonth },
+          status: "completed",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          avgOrder: { $avg: "$total" },
+        },
+      },
+    ]);
+
+    // 4. Sales Performance by Day of Week (this year)
+    const salesByDay = await OrderModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfCurrentYear },
+          status: "completed",
+        },
+      },
+      {
+        $group: {
+          _id: { $dayOfWeek: "$createdAt" },
+          totalSales: { $sum: "$total" },
+        },
+      },
+      {
+        $sort: { _id: 1 }, // Sort by day of week (1=Sunday, 2=Monday, ..., 7=Saturday)
+      },
+      {
+        $project: {
+          day: {
+            $arrayElemAt: [
+              ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+              { $subtract: ["$_id", 1] },
+            ],
+          },
+          totalSales: 1,
+        },
+      },
+    ]);
+
+    // 5. Top 5 Most Ordered Items (this year)
+    const topItems = await OrderModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfCurrentYear },
+          status: "completed",
+        },
+      },
+      { $unwind: "$items" }, // Unwind the items array
+      {
+        $group: {
+          _id: "$items.product",
+          totalOrdered: { $sum: "$items.quantity" },
+        },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      { $unwind: "$product" },
+      {
+        $project: {
+          name: "$product.name",
+          totalOrdered: 1,
+        },
+      },
+      { $sort: { totalOrdered: -1 } },
+      { $limit: 5 },
+    ]);
+
+    // Format the response
+    const response = {
+      dailyRevenue: dailyRevenue[0]?.totalRevenue || 0,
+      totalOrders,
+      averageOrderValue: avgOrderValue[0]?.avgOrder || 0,
+      salesByDay,
+      topItems,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
 };

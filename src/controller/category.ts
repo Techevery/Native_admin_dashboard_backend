@@ -189,7 +189,7 @@ export const updateCategory = async (req: Request, res: Response) => {
     console.log("running updateCategory");
   const { id } = req.params;
   const { name, description, status, subcategories } = req.body;
-  const { image } = req.files as { image?: any }; // Adjust based on your file upload middleware
+  const { image } = req.files as { image?: any }; 
 
   // Validate ID
   if (!isValidObjectId(id)) {

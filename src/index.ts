@@ -15,7 +15,7 @@ app.use(express.urlencoded({ extended: true }))
  
 app.get('/', (req, res) => {  
   res.send('Hello World!')     
-})
+}) 
 
 
 const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', "https://native-delight-admin.vercel.app", "https://native-delight-admin-jhjiprsbp-amiscripts-projects.vercel.app"]

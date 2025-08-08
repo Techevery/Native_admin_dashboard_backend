@@ -66,8 +66,53 @@ export const createProduct: RequestHandler = async (req, res) => {
   }
 };
 
+// export const getAllProduct: RequestHandler = async (req, res) => {
+//   try {
+//     const products = await productModel.aggregate([
+//       {
+//         $lookup: {
+//           from: "categories",
+//           localField: "category",
+//           foreignField: "_id",
+//           as: "category",
+//         },
+//       },
+//       { $unwind: "$category" },   
+//       {
+//         $lookup: {
+//           from: "subcategories",
+//           localField: "category.subcategories",
+//           foreignField: "_id",
+//           as: "category.subcategories",
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 1,
+//           name: 1,
+//           price: 1,
+//           description: 1,
+//           status: 1,
+//           image: "$image.url", // Only include the image URL
+//           category: {
+//             name: "$category.name",
+//             subcategory: {
+//               $arrayElemAt: ["$category.subcategories.name", 0], // Get first subcategory name
+//             },
+//           },
+//         },
+//       },
+//     ]);
+
+//     res.status(200).json({ success: true, products });
+//   }catch{
+//     res.status(500).json({ success: false, message: "Error getting products" });
+//   }
+// }
+
 export const getAllProduct: RequestHandler = async (req, res) => {
   try {
+    // Fetch products with category and subcategory details
     const products = await productModel.aggregate([
       {
         $lookup: {
@@ -93,22 +138,63 @@ export const getAllProduct: RequestHandler = async (req, res) => {
           price: 1,
           description: 1,
           status: 1,
-          image: "$image.url", // Only include the image URL
+          image: "$image.url",
           category: {
             name: "$category.name",
             subcategory: {
-              $arrayElemAt: ["$category.subcategories.name", 0], // Get first subcategory name
+              $arrayElemAt: ["$category.subcategories.name", 0],
             },
           },
         },
       },
     ]);
 
-    res.status(200).json({ success: true, products });
-  }catch{
+    // Fetch summary statistics
+    const stats = await productModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalProducts: { $sum: 1 },
+          totalActive: {
+            $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] },
+          },
+          totalInStock: {
+            $sum: { $cond: [{ $eq: ["$stock", "In Stock"] }, 1, 0] },
+          },
+          totalOutOfStock: {
+            $sum: { $cond: [{ $eq: ["$stock", "Out of Stock"] }, 1, 0] },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalProducts: 1,
+          totalActive: 1,
+          totalInStock: 1,
+          totalOutOfStock: 1,
+        },
+      },
+    ]);
+
+    // Extract stats (since $group returns an array, take the first element)
+    const summary = stats[0] || {
+      totalProducts: 0,
+      totalActive: 0,
+      totalInStock: 0, 
+      totalOutOfStock: 0,
+    };
+
+    // Send response with products and summary statistics
+    res.status(200).json({
+      success: true,
+      products,
+      summary,
+    });
+  } catch (error) {
     res.status(500).json({ success: false, message: "Error getting products" });
   }
-}
+};
 
 export const getProduct: RequestHandler = async (req, res) => {
   const { id } = req.params;
