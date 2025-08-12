@@ -43,6 +43,6 @@ app.use("/auth", authRouter)
 dbConnect()
  
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+app.listen(PORT, () => { 
     console.log(`Server is running on http://localhost:${PORT}`);   
 })  

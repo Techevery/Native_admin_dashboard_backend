@@ -5,10 +5,10 @@ import { isAdmin, isAuth } from "../middleware/auth";
 
 const categoryRouter = Router()
 
-categoryRouter.post("/create", fileParser, createCategory)  
+categoryRouter.post("/create", isAuth, fileParser, createCategory)  
 categoryRouter.get("/", getCategory)
-categoryRouter.get("/:id", getCategoryById)
-categoryRouter.patch("/:id", fileParser, updateCategory)
-categoryRouter.delete("/:id", deleteCategory)  
+categoryRouter.get("/:id", getCategoryById)   
+categoryRouter.patch("/:id", fileParser, isAuth, isAdmin, updateCategory)
+categoryRouter.delete("/:id", isAuth, isAdmin, deleteCategory)  
 
 export default categoryRouter    

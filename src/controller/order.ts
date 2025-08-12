@@ -323,6 +323,133 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
     }
 };
 
+
+// export const fetchOrders: RequestHandler = async (req, res, next) => {
+//     try {
+//         const page = parseInt(req.query.page as string) || 1;
+//         const limit = parseInt(req.query.limit as string) || 10;
+//         const skip = (page - 1) * limit;
+
+//         const now = new Date();
+//         const startOfCurrentMonth = startOfMonth(now);
+//         const startOfCurrentYear = startOfYear(now);
+
+//         const [result] = await OrderModel.aggregate([
+//             {
+//                 $facet: {
+//                     paginatedOrders: [
+//                         { $unwind: { path: "$items", preserveNullAndEmptyArrays: true } },
+//                         {
+//                             $lookup: {
+//                                 from: "Product",
+//                                 localField: "items.product",
+//                                 foreignField: "_id",
+//                                 as: "items.product",
+//                             },
+//                         },
+//                         { $unwind: { path: "$items.product", preserveNullAndEmptyArrays: true } },
+//                         {
+//                             $group: {
+//                                 _id: "$_id",
+//                                 email: { $first: "$email" },
+//                                 items: {
+//                                     $push: {
+//                                         productId: { $ifNull: ["$items.product._id", null] },
+//                                         productName: { $ifNull: ["$items.product.name", "Unknown Product"] },
+//                                         price: { $ifNull: ["$items.product.price", 0] },
+//                                         quantity: "$items.quantity",
+//                                     },
+//                                 },
+//                                 address: { $first: "$address" },
+//                                 phone: { $first: "$phone" },
+//                                 paymentType: { $first: "$paymentType" },
+//                                 status: { $first: "$status" },
+//                                 reference: { $first: "$reference" },
+//                                 total: { $first: "$total" },
+//                                 createdAt: { $first: "$createdAt" },
+//                                 updatedAt: { $first: "$updatedAt" },
+//                                 __v: { $first: "__v" },
+//                             },
+//                         },
+//                         { $match: { items: { $ne: [] } } }, // Ensure orders have at least one item
+//                         { $sort: { createdAt: -1 } },
+//                         { $skip: skip },
+//                         { $limit: limit },
+//                     ],
+//                     totalCount: [{ $count: "count" }],
+//                     monthlyCount: [
+//                         { $match: { createdAt: { $gte: startOfCurrentMonth } } },
+//                         { $count: "count" },
+//                     ],
+//                     yearlyCount: [
+//                         { $match: { createdAt: { $gte: startOfCurrentYear } } },
+//                         { $count: "count" },
+//                     ],
+//                     pendingCount: [
+//                         { $match: { status: "pending" } },
+//                         { $count: "count" },
+//                     ],
+//                     processingCount: [
+//                         { $match: { status: "processing" } },
+//                         { $count: "count" },
+//                     ],
+//                     completedCount: [
+//                         { $match: { status: "completed" } },
+//                         { $count: "count" },
+//                     ],
+//                     cancelledCount: [
+//                         { $match: { status: "cancelled" } },
+//                         { $count: "count" },
+//                     ],
+//                 },
+//             },
+//             {
+//                 $project: {
+//                     orders: "$paginatedOrders",
+//                     total: { $arrayElemAt: ["$totalCount.count", 0] },
+//                     monthly: { $arrayElemAt: ["$monthlyCount.count", 0] },
+//                     yearly: { $arrayElemAt: ["$yearlyCount.count", 0] },
+//                     pending: { $arrayElemAt: ["$pendingCount.count", 0] },
+//                     completed: { $arrayElemAt: ["$completedCount.count", 0] },
+//                     cancelled: { $arrayElemAt: ["$cancelledCount.count", 0] },
+//                     processing: { $arrayElemAt: ["$processingCount.count", 0] },
+//                 },
+//             },
+//         ]);
+
+//         const total = result.total || 0;
+//         const monthly = result.monthly || 0;
+//         const yearly = result.yearly || 0;
+//         const pending = result.pending || 0;
+//         const completed = result.completed || 0;
+//         const cancelled = result.cancelled || 0;
+//         const processing = result.processing || 0;
+
+//         const totalPages = Math.ceil(total / limit);
+
+//         res.status(200).json({
+//             success: true,
+//             data: {
+//                 orders: result.orders,
+//                 pagination: {
+//                     currentPage: page,
+//                     totalPages,
+//                     totalOrders: total,
+//                     monthlyOrders: monthly,
+//                     yearlyOrders: yearly,
+//                     pendingOrders: pending,
+//                     completedOrders: completed,
+//                     cancelledOrders: cancelled,
+//                     processingOrders: processing,
+//                 },
+//             },
+//         });
+//     } catch (error) {
+//         console.error("Error fetching orders:", error);
+//         next(error);
+//     }
+// };
+
 export const updateOrderStatus: RequestHandler = async (req, res, next) => {
     const { orderId } = req.params;
     const { status } = req.body;
