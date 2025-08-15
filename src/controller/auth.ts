@@ -50,7 +50,7 @@ export const createUser:RequestHandler = async (req, res) => {
   const avatar = req.files?.avatar as any;
 
   try {
-    // Validate required fields
+    // Validate required fields 
     if (!email || !role) {
       return res.status(400).json({ message: 'Email and role are required' });
     }
