@@ -9,20 +9,22 @@ import cloudinary from "../cloud";
 export const login: RequestHandler = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await userModel.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const userExist = await userModel.findOne({ email });
+    if (!userExist) return res.status(404).json({ message: "User not found" });
 
-    const passwordMatch = await compare(password, user.password);
+    const passwordMatch = await compare(password, userExist.password);
     if (!passwordMatch)
       return res.status(401).json({ message: "Invalid password" });
 
     // Update last login time
-    user.lastLogin = new Date();
-    await user.save();   
+    userExist.lastLogin = new Date();
+    await userExist.save();   
 
-    const payload = { id: user._id, role: user.role };
+    const payload = { id: userExist._id, role: userExist.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET as string);
-    res.status(200).json({ message: "user login successful", token });
+
+    const user = {name: userExist.name, email: userExist.email, role: userExist.role, status: userExist.status, lastLogin: userExist.lastLogin}
+    res.status(200).json({ message: "user login successful", token, user });
   } catch (error) {
     return res.status(500).json({message: "Unable to login user", error})       
   }

@@ -9,6 +9,6 @@ authRouter.post("/login", login)
 authRouter.post("/add-user", isAuth, isAdmin, fileParser, addNewUser)
 authRouter.post("/change-password", isAuth, changeUserPassword)
 authRouter.get("/users", isAuth, isAdmin, getAllUsers)
-authRouter.delete("/users/:id", isAuth, isAdmin, deleteUser) 
+authRouter.delete("/user/:id", isAuth, isAdmin, deleteUser) 
 
 export default authRouter
