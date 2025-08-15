@@ -78,7 +78,6 @@ export const createUser:RequestHandler = async (req, res) => {
 
     // Generate and hash password
     const userPassword = generatePassword();
-    console.log(userPassword)
     const hashedPassword = await hash(userPassword, 10);
 
     // Create user
@@ -101,6 +100,7 @@ export const createUser:RequestHandler = async (req, res) => {
     });
   } catch (error: any) {
     // Handle specific errors
+    console.log(error)
     if (error.code === 11000) {
       return res.status(400).json({ message: 'Email already exists' });
     }
