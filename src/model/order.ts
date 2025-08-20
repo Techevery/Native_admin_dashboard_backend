@@ -16,6 +16,7 @@ interface OrderDocs {
     status: "pending" | "completed" | "cancelled";
     reference: string;
     total: number
+    orderId : string
 }
 
 // Define the ProductItem schema
@@ -31,6 +32,7 @@ const orderSchema = new Schema<OrderDocs>(
         items: { type: [productItemSchema], required: true }, // Use the subdocument schema
         address: { type: String, required: true },
         phone: { type: String, required: true },
+        orderId: {type: String},
         paymentType: {
             type: String,
             enum: ["whatsapp", "card"],

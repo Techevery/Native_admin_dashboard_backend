@@ -4,7 +4,7 @@ import cloudinary from "../cloud";
 import mongoose from "mongoose";
 
 export const createProduct: RequestHandler = async (req, res) => {
-  const { name, price, description, status, category } = req.body;
+  const { name, price, description, status, category, subCategory } = req.body;
   const {image} = req.files as any;
 
   try {
@@ -22,6 +22,7 @@ export const createProduct: RequestHandler = async (req, res) => {
       description,
       status,
       category,
+      subCategory,
       image: { id: '', url: '' }, // Initialize image object
     });
 
@@ -68,6 +69,7 @@ export const createProduct: RequestHandler = async (req, res) => {
 
 // export const getAllProduct: RequestHandler = async (req, res) => {
 //   try {
+//     // Fetch products with category and subcategory details
 //     const products = await productModel.aggregate([
 //       {
 //         $lookup: {
@@ -77,13 +79,19 @@ export const createProduct: RequestHandler = async (req, res) => {
 //           as: "category",
 //         },
 //       },
-//       { $unwind: "$category" },   
+//       { $unwind: "$category" },
 //       {
 //         $lookup: {
 //           from: "subcategories",
-//           localField: "category.subcategories",
+//           localField: "subCategory", // Use subCategory field directly
 //           foreignField: "_id",
-//           as: "category.subcategories",
+//           as: "subCategoryDetails",
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$subCategoryDetails",
+//           preserveNullAndEmptyArrays: true, // Allow products with no subcategory
 //         },
 //       },
 //       {
@@ -93,22 +101,67 @@ export const createProduct: RequestHandler = async (req, res) => {
 //           price: 1,
 //           description: 1,
 //           status: 1,
-//           image: "$image.url", // Only include the image URL
+//           stock: 1,
+//           image: "$image.url",
 //           category: {
+//             _id: "$category._id",
 //             name: "$category.name",
-//             subcategory: {
-//               $arrayElemAt: ["$category.subcategories.name", 0], // Get first subcategory name
-//             },
+//           },
+//           subCategory: {
+//             _id: "$subCategoryDetails._id",
+//             name: "$subCategoryDetails.name",
 //           },
 //         },
 //       },
 //     ]);
 
-//     res.status(200).json({ success: true, products });
-//   }catch{
+//     // Fetch summary statistics
+//     const stats = await productModel.aggregate([
+//       {
+//         $group: {
+//           _id: null,
+//           totalProducts: { $sum: 1 },
+//           totalActive: {
+//             $sum: { $cond: [{ $eq: ["$status", "active"] }, 1, 0] },
+//           },
+//           totalInStock: {
+//             $sum: { $cond: [{ $eq: ["$stock", "In Stock"] }, 1, 0] },
+//           },
+//           totalOutOfStock: {
+//             $sum: { $cond: [{ $eq: ["$stock", "Out of Stock"] }, 1, 0] },
+//           },
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           totalProducts: 1,
+//           totalActive: 1,
+//           totalInStock: 1,
+//           totalOutOfStock: 1,
+//         },
+//       },
+//     ]);
+
+//     // Extract stats
+//     const summary = stats[0] || {
+//       totalProducts: 0,
+//       totalActive: 0,
+//       totalInStock: 0,
+//       totalOutOfStock: 0,
+//     };
+
+//     // Send response with products and summary statistics
+//     res.status(200).json({
+//       success: true,
+//       products,
+//       summary,
+//     });
+//   } catch (error) {
+//     console.error("Error getting products:", error);
 //     res.status(500).json({ success: false, message: "Error getting products" });
 //   }
-// }
+// };
 
 export const getAllProduct: RequestHandler = async (req, res) => {
   try {
@@ -126,7 +179,7 @@ export const getAllProduct: RequestHandler = async (req, res) => {
       {
         $lookup: {
           from: "subcategories",
-          localField: "subCategory", // Use subCategory field directly
+          localField: "subCategory", // Reference the subCategory field in Product
           foreignField: "_id",
           as: "subCategoryDetails",
         },
@@ -151,8 +204,14 @@ export const getAllProduct: RequestHandler = async (req, res) => {
             name: "$category.name",
           },
           subCategory: {
-            _id: "$subCategoryDetails._id",
-            name: "$subCategoryDetails.name",
+            $cond: {
+              if: { $eq: ["$subCategoryDetails", null] },
+              then: null,
+              else: {
+                _id: "$subCategoryDetails._id",
+                name: "$subCategoryDetails.name",
+              },
+            },
           },
         },
       },
@@ -261,50 +320,6 @@ export const getProduct: RequestHandler = async (req, res) => {
   }
 };
 
-// export const updateProduct: RequestHandler = async (req, res) => {
-//   const { id } = req.params;
-//   const { name, price, description, status } = req.body;
-//   const image = req.file;
-//   try {
-//     const product = await productModel.findById(id);
-//     if (!product) {
-//       return res.status(404).json({ success: false, message: "Product not found" });
-//     }
-//     if (image && !Array.isArray(image)) {
-//       const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-//       if (!allowedTypes.includes(image.mimetype)) {
-//         return res
-//           .status(400)
-//           .json({ success: false, message: "Invalid image format" });
-//       }
-//         if(product.image.id){
-//           await cloudinary.uploader.destroy(product.image.id);
-//         }
-//       await cloudinary.uploader.upload(image.path, { folder: "products" })
-//         .then((result) => {
-//           product.image.id = result.public_id;
-//           product.image.url = result.secure_url;
-//           product.name = name;
-//           product.price = price;
-//           product.description = description;
-//           product.status = status;
-//           product.save();
-//           res
-//             .status(200)
-//             .json({
-//               success: true,
-//               message: "Product updated successfully",
-//               product,
-//           })
-//         })
-//       }
-//   } catch{
-//     res
-//       .status(500)
-//       .json({ success: false, message: "Error updating product" });
-//   }
-// }
-
 export const updateProduct: RequestHandler = async (req, res) => {
   const { id } = req.params;
   const { name, price, description, status, category, subCategory, stock } = req.body;
@@ -329,6 +344,7 @@ export const updateProduct: RequestHandler = async (req, res) => {
     if (description) product.description = description;
     if (status) product.status = status;
     if (stock) product.stock = stock;
+    if(subCategory) product.subCategory = subCategory;
 
     // Validate and update category if provided
     if (category) {
@@ -382,6 +398,8 @@ export const updateProduct: RequestHandler = async (req, res) => {
 
 export const deleteProduct: RequestHandler = async (req, res) => {
   const { id } = req.params;
+
+  console.log(id, "prooduct id")
   try {
     const product = await productModel.findById(id);
     if (!product) {
@@ -391,6 +409,7 @@ export const deleteProduct: RequestHandler = async (req, res) => {
       await cloudinary.uploader.destroy(product.image.id);
     }
     await product.deleteOne();
+    res.status(200).json({success: true, message: "Prooduct deleted successfully!"})
   }catch(error){
     res  
       .status(500)

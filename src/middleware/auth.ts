@@ -37,7 +37,7 @@ export const isAuth: RequestHandler = async(req, res, next) => {
 
 } 
 
-export const isAdmin: RequestHandler = (req, res, next) => {
+export const isAdmin: RequestHandler = (req, res, next) => { 
     if (req.user?.role !== "admin") {
         return res.status(401).json({ message: `Unauthorized only admin can access this route` });
     }

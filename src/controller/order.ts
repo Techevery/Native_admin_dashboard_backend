@@ -6,6 +6,7 @@ import { sendEmail } from "../utils/email";
 import { sendSMSOrder } from "../utils/sms";
 import { startOfMonth, startOfYear, startOfDay, endOfDay } from "date-fns";
 import productModel from "../model/product";
+import { generateOrderId } from "../utils/orderNumber";
 
 
 export const createOrder: RequestHandler = async (req, res, next) => {
@@ -44,6 +45,9 @@ export const createOrder: RequestHandler = async (req, res, next) => {
             return res.status(400).json({ message: "Amount mismatch" });
         }
 
+        const orderNumber = generateOrderId()
+        console.log(orderNumber)
+
         // Create and save the order
         const newOrder = new OrderModel({
             email,
@@ -52,6 +56,7 @@ export const createOrder: RequestHandler = async (req, res, next) => {
             phone,
             paymentType: "card",
             total: amount,
+            orderId: orderNumber
         });
 
         await newOrder.save();
@@ -205,6 +210,7 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
                                 phone: { $first: "$phone" },
                                 paymentType: { $first: "$paymentType" },
                                 status: { $first: "$status" },
+                                orderId: {$first: "$orderId"},
                                 reference: { $first: "$reference" },
                                 total: { $first: "$total" },
                                 createdAt: { $first: "$createdAt" },

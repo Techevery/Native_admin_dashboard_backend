@@ -17,16 +17,16 @@ app.get('/', (req, res) => {
   res.send('Hello World!')     
 }) 
 
-const allowedOrigins = ['http://localhost:3000', 'https://native-delight-plus-d9oo.vercel.app', "https://native-delight-admin.vercel.app", "https://native-delight-admin-jhjiprsbp-amiscripts-projects.vercel.app"]
+const allowedOrigins = ['http://localhost:3000', "http://localhost:3001", 'https://native-delight-plus-d9oo.vercel.app', "https://native-delight-plus-d9oo-git-master-amiscripts-projects.vercel.app", "https://native-delight-admin.vercel.app", "https://native-delight-admin-jhjiprsbp-amiscripts-projects.vercel.app"]
 
 app.use(cors({
   origin: (origin, callback) => { 
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+        
     // Check if the origin is in the allowed list
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+    if (allowedOrigins.includes(origin)) { 
+      return callback(null, true);  
     } 
 
     return callback(new Error('Not allowed by CORS'));

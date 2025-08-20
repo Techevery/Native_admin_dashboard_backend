@@ -22,7 +22,6 @@ export const createSubCategory = async (req: any, res: any) => {
 export const fechSubCategoriesData = async (req: any, res: any) => {
     try {
         const subcategories = await SubCategoryModel.find() 
-        console.log(subcategories)
         return res.status(201).json(subcategories)
     } catch (error: any) {
         throw new Error(error)
