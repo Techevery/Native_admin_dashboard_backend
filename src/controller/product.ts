@@ -324,14 +324,13 @@ export const updateProduct: RequestHandler = async (req, res) => {
   const { id } = req.params;
   const { name, price, description, status, category, subCategory, stock } = req.body;
   const image = req.file;
-  console.log(req.body, id, "bdy")
 
   try {
     // Validate product ID
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ success: false, message: "Invalid product ID" });
     }
-
+        
     // Find the product
     const product = await productModel.findById(id);
     if (!product) {
@@ -399,7 +398,6 @@ export const updateProduct: RequestHandler = async (req, res) => {
 export const deleteProduct: RequestHandler = async (req, res) => {
   const { id } = req.params;
 
-  console.log(id, "prooduct id")
   try {
     const product = await productModel.findById(id);
     if (!product) {

@@ -291,7 +291,7 @@ export const fetchOrders: RequestHandler = async (req, res, next) => {
                     processing: { $arrayElemAt: ["$processingCount.count", 0] },
                 },
             },
-        ]);
+        ]); 
 
         // Handle case when counts are empty
         const total = result.total || 0;

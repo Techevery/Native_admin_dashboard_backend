@@ -132,10 +132,7 @@ export const createCategory = async (req: any, res: any) => {
     if (subcategories && !Array.isArray(subcategories)) {
       return res.status(400).json({ message: 'Subcategories must be an array' });
     }
-    if (subcategories?.some((id: string) => !mongoose.Types.ObjectId.isValid(id))) {
-      return res.status(400).json({ message: 'Invalid subcategory ID' });
-    }
-
+ 
     const newCategory = new CategoryModel({ name, description, status, subcategories });
     if (image && !Array.isArray(image) && image.mimetype?.startsWith('image')) {
       const result = await cloudinary.uploader.upload(image.filepath, { folder: 'categories' });
