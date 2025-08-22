@@ -19,7 +19,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Verify package-lock.json
-        run: test -f package-lock.json || echo "Warning: package-lock.json not found, caching may not work"
+        run: 'test -f package-lock.json || echo "Warning: package-lock.json not found, caching may not work"'
+        shell: bash
         continue-on-error: true
 
       - name: Set up Node.js
@@ -49,4 +50,5 @@ jobs:
         continue-on-error: true
 
       - name: Job status
-        run: echo "✅ Job status: ${{ job.status }}"
+        run: 'echo "✅ Job status: ${{ job.status }}"'
+        shell: bash
