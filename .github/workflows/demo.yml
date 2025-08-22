@@ -1,7 +1,6 @@
 name: CI Pipeline for Native Delight Server
 run-name: Build and Test by ${{ github.actor }} 🚀
 
-# Define when the workflow should run
 on:
   push:
     branches:
@@ -13,48 +12,25 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
-    # Define environment variables (optional, customize as needed)
     env:
-      NODE_VERSION: '20' # Specify the Node.js version
-
+      NODE_VERSION: '20'
     steps:
-      # Check out the repository code
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm' # Cache npm dependencies to speed up future runs
-
-      # Install dependencies
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci
-        # Use `npm ci` for CI environments (faster, uses package-lock.json
-
-      # Run TypeScript type checking (without emitting JS files)
       - name: TypeScript type check
         run: npm run type-check
-        # Add to package.json: "type-check": "tsc --noEmit"
-
-      # Compile TypeScript to JavaScript
       - name: Compile TypeScript
         run: npm run build
-        # Add to package.json: "build": "tsc"
-
-      # Run tests
       - name: Run tests
         run: npm test
-        # Add to package.json: "test": "jest" (or your test framework)
-
-      # List files in the workspace (optional, for debugging)
       - name: List compiled files
         run: ls -la ${{ github.workspace }}/dist
-        # Adjust path based on your tsconfig.json output directory
-
-      # Print job status (optional)
       - name: Job status
         run: echo "✅ Job status: ${{ job.status }}"
