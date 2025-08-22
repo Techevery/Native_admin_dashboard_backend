@@ -1,18 +1,60 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+name: CI Pipeline for Native Delight Server
+run-name: Build and Test by ${{ github.actor }} 🚀
+
+# Define when the workflow should run
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  Explore-GitHub-Actions:
+  build-and-test:
     runs-on: ubuntu-latest
+
+    # Define environment variables (optional, customize as needed)
+    env:
+      NODE_VERSION: '20' # Specify the Node.js version
+
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
+      # Check out the repository code
+      - name: Checkout code
         uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+
+      # Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm' # Cache npm dependencies to speed up future runs
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
+        # Use `npm ci` for CI environments (faster, uses package-lock.json
+
+      # Run TypeScript type checking (without emitting JS files)
+      - name: TypeScript type check
+        run: npm run type-check
+        # Add to package.json: "type-check": "tsc --noEmit"
+
+      # Compile TypeScript to JavaScript
+      - name: Compile TypeScript
+        run: npm run build
+        # Add to package.json: "build": "tsc"
+
+      # Run tests
+      - name: Run tests
+        run: npm test
+        # Add to package.json: "test": "jest" (or your test framework)
+
+      # List files in the workspace (optional, for debugging)
+      - name: List compiled files
+        run: ls -la ${{ github.workspace }}/dist
+        # Adjust path based on your tsconfig.json output directory
+
+      # Print job status (optional)
+      - name: Job status
+        run: echo "✅ Job status: ${{ job.status }}"
